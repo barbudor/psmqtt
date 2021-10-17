@@ -37,3 +37,6 @@ venv.bak/
 # log files
 *.log
 
+# config files
+config/
+
