@@ -194,7 +194,7 @@ def on_connect(client, userdata, flags, result_code):
 
 # noinspection PyUnusedLocal
 def on_disconnect(mosq, userdata, rc):
-    logging.debug("OOOOPS! psmqtt disconnects")
+    logging.debug("OOOOPS! client %s disconnects: err %d"%(mosq, rc))
     time.sleep(10)
 
 
