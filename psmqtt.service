@@ -1,13 +1,18 @@
 [Unit]
-Description=Resource daemon to MQTT
-After=multi-user.target
+Description=PQMTT Monitoring Probe
+After=network-online.target
 
 [Service]
-WorkingDirectory=/path/to/psmqtt
-User=nobody
-Type=idle
-ExecStart=/usr/bin/python3 /path/to/psmqtt/psmqtt.py
+User=barbu
+Group=barbu
+Type=simple
+WorkingDirectory=/home/barbu/psmqtt
+ExecStart=/usr/bin/python3 /home/barbu/psmqtt/psmqtt.py
 Restart=always
+# Configures the time to wait before service is stopped forcefully.
+TimeoutStopSec=60
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
+
