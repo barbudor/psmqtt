@@ -1,5 +1,5 @@
 [Unit]
-Description=PQMTT Monitoring Probe
+Description=PSQMTT Monitoring Probe
 After=network-online.target
 
 [Service]
