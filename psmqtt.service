@@ -7,7 +7,7 @@ User=barbu
 Group=barbu
 Type=idle
 WorkingDirectory=/home/barbu/psmqtt
-ExecStart=source .venv/bin/activate && python3 /home/barbu/psmqtt/psmqtt.py
+ExecStart=/home/barbu/psmqtt/.venv/bin/python3 psmqtt.py
 Restart=always
 # Configures the time to wait before service is stopped forcefully.
 TimeoutStopSec=60
