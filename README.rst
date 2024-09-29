@@ -1,25 +1,62 @@
-.. contents:: Table of Contents
-
 =======
 Summary
 =======
 
-**PSMQTT** is a cross-platform utility for reporting system and processes utilization (CPU, memory, disks, network) using MQTT protocol.
+**PSMQTT** is a cross-platform utility for reporting system and processes
+metrics (CPU, memory, disks, network, S.M.A.R.T. disk data) to an MQTT broker.
 
-Is written in Python and based on briliant `psutil <https://github.com/giampaolo/psutil>`_ library.
+**PSMQTT**  is written in Python and is based on:
 
-============
-Installation
-============
-Just install required Python libraries using `pip <https://pip.pypa.io/en/stable/installing/>`_::
+* `paho-mqtt <https://github.com/eclipse/paho.mqtt.python>` to communicate with the MQTT broker;
+* `psutil <https://github.com/giampaolo/psutil>` to collect metrics;
+* `pySMART <https://github.com/truenas/py-SMART>` to collect SMART data;
+* `recurrent <https://github.com/kvh/recurrent>` to describe reporting schedule.
+* `jinja2 <https://github.com/alex-foundation/jinja2>` to format the data.
+
+=====================
+Installation with pip
+=====================
+
+Clone this repository and then install the required Python libraries using `pip <https://pip.pypa.io/en/stable/installing/>`_::
 
    pip install -r requirements.txt
-   
-After you can run main file using::
 
-  python psmqtt.py
+(Note that you should consider installing the required libraries in a Python venv to maintain them isolated from the rest of your Python installation.
+See `this page for more info <doc/debian.md>`_.)
 
-  
+Finally you can run **PSMQTT** using::
+
+   python psmqtt.py
+
+You may want to install **PSMQTT** as a service/system-daemon, see `this page for more info <doc/service.md>`_.
+
+
+=====================
+Installing on FreeBSD
+=====================
+
+See `FreeBSD doc <doc/freebsd.md>`_
+
+=====================
+Installing on Windows
+=====================
+
+See `Windows doc <doc/windows.md>`_
+
+
+==================
+Deploy with Docker
+==================
+
+**PSMQTT** is packaged also a multi-arch Docker image. If your system does not have Python3 installed or 
+you don't want to install **PSMQTT** Python dependencies in your environment, you can launch
+a Docker container::
+
+   docker run -d -v <your config file>:/opt/psmqtt/conf/psmqtt.conf \
+      --privileged --hostname $(hostname) \
+      ghcr.io/eschava/psmqtt:latest
+
+
 ===============================================
 General information about tasks and MQTT topics
 ===============================================
@@ -84,9 +121,9 @@ Examples::
 =============
 Configuration
 =============
-All configuration is present in **psmqtt.conf** file at the app's directory or any other file referenced by **PSMQTTCONFIG** environment variable.
+All configuration is present in **psmqtt.conf** file in the app's directory or any other file referenced by **PSMQTTCONFIG** environment variable.
 
-It's parsed using Python interpreter and contains constants for MQTT broker connection and tasks that have to be executed periodically (schedule).
+The configuration file is parsed using Python interpreter and contains constants for MQTT broker connection and tasks that have to be executed periodically (schedule).
 
 There are two ways how to force sending some system state parameter over MQTT topic
 
@@ -114,7 +151,7 @@ It's better to describe how to use it using example.
 To get information for task "cpu_percent" with MQTT prefix "psmqtt/COMPUTER_NAME/" you need to send any string on topic::
 
   psmqtt/COMPUTER_NAME/request/cpu_percent
-  
+
 and result will be pushed on the topic::
 
   psmqtt/COMPUTER_NAME/cpu_percent
@@ -134,7 +171,7 @@ CPU
    cpu_percent/*; - CPU usage in percent per CPU in one topic (JSON string)
    cpu_percent/{0/1/2/etc} - CPU usage for single CPU
    cpu_times_percent/* - CPU times in percent. Topic per parameter
-   cpu_times_percent/*;  - CPU times in percent in one topic (JSON string)   
+   cpu_times_percent/*;  - CPU times in percent in one topic (JSON string)
    cpu_times_percent/{user/nice/system/idle/iowait/irq/softirq/steal/guest} - CPU times in percent separate parameters
    cpu_times_percent/{user/nice/system/idle/iowait/irq/softirq/steal/guest}/* - CPU times in percent separate parameters. Topic per CPU number
    cpu_times_percent/{user/nice/system/idle/iowait/irq/softirq/steal/guest}/*; - CPU times in percent separate parameters per CPU number in one topic (JSON string)
@@ -144,7 +181,7 @@ CPU
    cpu_stats/* - CPU statistics. Topic per parameter
    cpu_stats/*;  - CPU statistics in one topic (JSON string)
    cpu_stats/{ctx_switches/interrupts/soft_interrupts/syscalls} - CPU statistics separate parameters
-   
+
 Memory
 ::
 
@@ -154,7 +191,7 @@ Memory
    swap_memory/* - Swap memory. Topic per parameter
    swap_memory/*;  - Swap memory in one topic (JSON string)
    swap_memory/{total/used/free/percent/sin/sout} - Swap memory separate parameters
-   
+
 Disks
 ::
 
@@ -200,6 +237,19 @@ Temperature
    sensors_temperatures/{SENSOR_NAME}/{DEVICE_NUMBER/DEVICE_LABEL}/*; - Single sensor device by number/label temperature in one topic (JSON string)
    sensors_temperatures/{SENSOR_NAME}/{DEVICE_NUMBER/DEVICE_LABEL}/{label/current/high/critical} - Single sensor device by number/label temperature separate parameters
 
+Fan speed
+::
+
+   sensors_fans/* - Fans current speeds. Topic per fan
+   sensors_fans/*;  - Fans current speeds in one topic (JSON string)
+   sensors_fans/{SENSOR_NAME} - Single fan current speed (could be array value if fan has several devices)
+   sensors_fans/{SENSOR_NAME}/* - Single fan speeds. Topic per speed
+   sensors_fans/{SENSOR_NAME}/*; - Single fan speeds in one topic (JSON string)
+   sensors_fans/{SENSOR_NAME}/{DEVICE_NUMBER/DEVICE_LABEL} - Single fan device by number/label current speed
+   sensors_fans/{SENSOR_NAME}/{DEVICE_NUMBER/DEVICE_LABEL}/* - Single fan device by number/label speed. Topic per parameter
+   sensors_fans/{SENSOR_NAME}/{DEVICE_NUMBER/DEVICE_LABEL}/*; - Single fan device by number/label speed in one topic (JSON string)
+   sensors_fans/{SENSOR_NAME}/{DEVICE_NUMBER/DEVICE_LABEL}/{label/current/high/critical} - Single fan device by number/label speed separate parameters
+
 Battery
 ::
 
@@ -238,7 +288,7 @@ Processes
             - top_memory - top memory consuming process
             - top_memory[N] - memory consuming process number N
             - pid[PATH] - process with ID specified in the file having PATH path (.pid file). Slashes in path should be replaced with vertical slash
-            - name[PATTERN] - process with name mathing PATTERN pattern (use * to match zero or more characters, ? for single character)
+            - name[PATTERN] - process with name matching PATTERN pattern (use * to match zero or more characters, ? for single character)
             - * - to get value of some property for all processes. Topic per process ID
             - *; - to get value of some property for all processes in one topic (JSON string)
         and PARAMETER_NAME could be one of
@@ -283,7 +333,7 @@ Processes
             - ** - all process properties and sub-properties. Topic per property
             - **; -  all process properties and sub-properties in one topic (JSON string)
 
-   
+
 ============
 Useful tasks
 ============
@@ -305,3 +355,19 @@ Useful tasks
 
 **processes/top_memory/exe** - executable file of top process consuming memory
 
+**smart/nvme0/** - all the device 'nvme0' SMART data, requries SUDO
+
+**smart/nvme0/temperature** - 'nvme0' temperature, requires SUDO
+
+
+======================
+Creating a new release
+======================
+
+New docker releases will be automatically published by the GitHub CI whenever a new tag is released on the project.
+Sometimes however it may be useful to publish a docker release manually.
+To push manually a new multi-arch docker version, use::
+
+   docker buildx build --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8, --tag ghcr.io/eschava/psmqtt:1.0.2 --build-arg USERNAME=root --push .
+
+(remember to update the tag version)

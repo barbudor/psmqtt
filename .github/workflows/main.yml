@@ -1,0 +1,75 @@
+# This workflow will build a Python project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python
+
+on: [push]
+
+jobs:
+
+  test_dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' 
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+  lint_code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' 
+      - name: Lint code with flake8
+        run: |
+          pip install flake8
+          echo "Running flake8 on repo"
+          flake8 -v
+
+      # TODO: it would be nice to have the project published on Pypi for easy installation via pip:
+      #- name: Publish package
+      #  uses: pypa/gh-action-pypi-publish@release/v1
+      #  with:
+      #    password: ${{ secrets.PYPI_API_TOKEN }}
+
+  build_docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image (no push)
+        # see https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions#accessing-secrets
+        # for the reason why DependaBot pull requests have no access to secrets like ${{ secrets.PAT_TOKEN_FOR_GITHUB }}
+        if: ${{ github.actor == 'dependabot[bot]' }}
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          # options related to BUILDing the docker image:
+          dockerfile: ./Dockerfile
+          multiPlatform: true
+          platform: linux/amd64,linux/arm64,linux/arm/v7
+          image: psmqtt
+          # options related to PUSHing the docker image:
+          registry: ghcr.io
+          pushImage: false
+
+      - name: Build and push Docker image
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          # options related to BUILDing the docker image:
+          dockerfile: ./Dockerfile
+          multiPlatform: true
+          platform: linux/amd64,linux/arm64,linux/arm/v7
+          image: psmqtt
+          addLatest: true
+          # options related to PUSHing the docker image:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.PAT_TOKEN_FOR_GITHUB }}
+          pushImage: true

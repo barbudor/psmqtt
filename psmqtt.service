@@ -5,9 +5,9 @@ After=network-online.target
 [Service]
 User=barbu
 Group=barbu
-Type=simple
+Type=idle
 WorkingDirectory=/home/barbu/psmqtt
-ExecStart=/usr/bin/python3 /home/barbu/psmqtt/psmqtt.py
+ExecStart=source .venv/bin/activate && /usr/bin/python3 /home/barbu/psmqtt/psmqtt.py
 Restart=always
 # Configures the time to wait before service is stopped forcefully.
 TimeoutStopSec=60

@@ -1,7 +1,13 @@
 # python
 __pycache__/
+__pypackages__/
 *.py[cod]
 *$py.class
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
 # Distribution / packaging
 .Python
@@ -39,3 +45,6 @@ venv.bak/
 
 #local config file
 psmqtt.conf
+
+.scrapy
+*.log
