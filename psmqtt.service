@@ -12,7 +12,8 @@ After=multi-user.target
 User=barbu
 Group=barbu
 Type=idle
-WorkingDirectory=/home/barbu/psmqtt
+WorkingDirectory=/home/barbu/psmqtt/src/psmqtt
+Environment="PSMQTTCONFIG=/home/barbu/psmqtt/psmqtt.yml"
 ExecStartPre=source /home/barbu/psmqtt/.venv/bin/activate
 ExecStart=/home/barbu/psmqtt/.venv/bin/python3 psmqtt.py
 
