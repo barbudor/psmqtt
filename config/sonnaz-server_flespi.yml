@@ -85,17 +85,17 @@ schedule:
         params: [ "last5min", "percent" ]
         formatter: "{{'%0.2f'|format(x)}}"
 
-  - cron: "every 10 minutes"
-    tasks:
+#   - cron: "every 10 minutes"
+#     tasks:
       - task: sensors_temperatures
-        params: [ coretemp, 0 ]
+        params: [ coretemp, * ]
         topic: temp
       - task: disk_usage
         params: [ percent , "/" ]
         topic: du_root_percent
 
-  - cron: "every 60 minutes"
-    tasks:
+#   - cron: "every 60 minutes"
+#     tasks:
       - task: boot_time
         params: [ uptime ]
         topic: uptimesec
