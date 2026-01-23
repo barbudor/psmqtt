@@ -2,33 +2,54 @@
 
 ## Python linting
 
-I use `mypy` and `flake8`:
+For psmqtt development please install `mypy` and `flake8`:
 
 * install these using using `pip`
 * `../.vscode/settings.json` takes advantage of these
 * `.flake8` and `mypy.ini` control their behavior
 
+It's suggested to use 
+
+```sh
+make test-wheel
+```
+
+to test how the project will work in a real installation (via Pypi in this case).
+
+
 ## Python Testing
 
 Just do:
 
+```sh
+make unit-tests
 ```
-python3 -m unittest -v src/*_test.py
+
+or 
+
+```sh
+make integration-tests
 ```
+
 
 ## Dependencies
 
-* [psutil](https://psutil.readthedocs.io/en/latest/) to retrieve sensor values
-and
-* [recurrent](https://github.com/kvh/recurrent) to schedule the actions
+See the [requirements.txt](requirements.txt) file
+
+## Creating a new release
+
+New docker releases will be automatically published by the GitHub CI whenever a new tag is released on the project.
+Sometimes however it may be useful to publish a docker release manually.
+To push manually a new multi-arch docker version, use::
+
+```sh
+docker buildx build --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8, --tag ghcr.io/eschava/psmqtt:<new-tag> --build-arg USERNAME=root --push .
+```
+
+(remember to update the tag version)
 
 ## TODO
 
-* add python typing - DONE
-* get rid of import * - DONE
-* document use of testing - DONE
-* document docker build and run - DONE
-* document use as a service - DONE
-* reorg files into src directory - DONE
 * support MQTTv5?
-* use `smartctl` to determine the disk HD temps
+* restore the ability to request psmqtt tasks from MQTT
+* implement batch transmission to MQTT to optimize network and CPU usage

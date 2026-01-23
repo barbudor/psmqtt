@@ -1,13 +1,21 @@
+#
+# psmqtt SystemD service definition
+# See [docs/service.md] for more information.
+#
+
 [Unit]
-Description=PSQMTT Monitoring Probe
-After=network-online.target
+<<<<<<< HEAD
+Description=psmqtt daemon for publishing system metrics to an MQTT broker
+After=multi-user.target
 
 [Service]
 User=barbu
 Group=barbu
 Type=idle
 WorkingDirectory=/home/barbu/psmqtt
+ExecStartPre=source /home/barbu/psmqtt/.venv/bin/activate
 ExecStart=/home/barbu/psmqtt/.venv/bin/python3 psmqtt.py
+
 Restart=always
 # Configures the time to wait before service is stopped forcefully.
 TimeoutStopSec=60
@@ -15,4 +23,3 @@ RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
-

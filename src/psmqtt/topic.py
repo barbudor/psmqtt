@@ -1,7 +1,14 @@
+# Copyright (c) 2016 psmqtt project
+# Licensed under the MIT License.  See LICENSE file in the project root for full license information.
+
 from typing import Tuple
 
 class Topic:
     def __init__(self, topic:str):
+
+        # sanitize topic name by removing any empty topic-level separators:
+        topic = topic.replace('//', '/')
+
         self.topic = topic
         self.wildcard_index, self.wildcard_len = self._find_wildcard(topic)
         return
@@ -32,8 +39,10 @@ class Topic:
 
     def get_subtopic(self, param:str) -> str:
         if self.wildcard_index < 0:
-            raise Exception("Topic " + self.topic + " have no wildcard")
-        return self.topic[:self.wildcard_index] + param + self.topic[self.wildcard_index + self.wildcard_len:]
+            raise Exception(f"Topic {self.topic} has no wildcard")
+        subtopic = self.topic[:self.wildcard_index] + param + self.topic[self.wildcard_index + self.wildcard_len:]
+        # ensure no empty topic-level separators are present:
+        return subtopic.replace("//", "/")
 
     def get_topic(self) -> str:
         return self.topic
